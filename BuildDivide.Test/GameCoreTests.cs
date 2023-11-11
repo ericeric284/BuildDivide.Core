@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace BuildDivide.Test
 {
-    public class GameCore_Tests
+    public class GameCoreTests
     {
 
         [Fact]
