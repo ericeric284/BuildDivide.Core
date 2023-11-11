@@ -1,9 +1,11 @@
 ﻿using BuildDivide.Core.Cards;
 using BuildDivide.Core.Decks;
+using BuildDivide.Core.Windows;
 
 namespace BuildDivide.Core.Games
 {
-    public class Player
+	//TODO: make player abstract class
+    public abstract class Player
 	{
 		public Deck Deck { get; set; }
 		public Card Territory { get; set; }
@@ -123,6 +125,7 @@ namespace BuildDivide.Core.Games
 			return Task.CompletedTask;
 		}
 
+		public abstract Task<PlayWindowActionType> ResolvePlayWindowActionAsync(PlayWindow playWindow);
 	}
 
 	
@@ -140,6 +143,8 @@ namespace BuildDivide.Core.Games
         public Player Player2 { get; }
 
 		public Player TurnPlayer { get; private set; }
+
+        public Player NonTurnPlayer => TurnPlayer == Player1 ? Player2 : Player1;
 
         public GameCore(Player player1, Player player2)
         {

@@ -38,7 +38,20 @@
 
         public void Action(GameCore gameCore)
         {
-            throw new NotImplementedException();
+            //703-1
+            //TODO: draw phase start trigger
+
+            //703-2
+            //TODO: handle 1103 play window
+
+            //703-3
+            if (gameCore.Turn != 1)
+            {
+                gameCore.TurnPlayer.DrawCard();
+            }
+
+            //703-4
+            //TODO: handle 1103 play window
         }
     }
     public class MainPhase : IGamePhase
@@ -47,7 +60,11 @@
 
         public void Action(GameCore gameCore)
         {
-            throw new NotImplementedException();
+            //704-1
+            //TODO: start phase trigger
+
+            //704-2
+            //TODO: handle 1103 play window
         }
     }
     public class AttackPhase : IGamePhase
@@ -56,6 +73,7 @@
 
         public void Action(GameCore gameCore)
         {
+            //TODO: Attack phase
             throw new NotImplementedException();
         }
     }
@@ -65,7 +83,26 @@
 
         public void Action(GameCore gameCore)
         {
-            throw new NotImplementedException();
+            //706-1
+            //TODO: turn end trigger & end phase start trigger
+
+            //706-2
+            //TODO: handle 1103 play window
+
+            //706-3
+            //TODO: reset all unit damage
+
+            //706-4
+            //TODO: Remove effect that works only in this turn
+
+            //706-5
+            //TODO: If player has too much card in hand, discard card
+
+            //706-6
+            //TODO: If there are multipel territory on territory zone and field, remove all territory except one
+
+            //706-7
+            //TODO: if there's 1303 or 1205-2,return to 706-2,otherwise end turn and start next turn
         }
     }
 }

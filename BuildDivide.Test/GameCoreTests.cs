@@ -16,9 +16,9 @@ namespace BuildDivide.Test
         public void PreparationTest()
         {
             //arrange
-            var player1 = new Player(TestDeckService.CreateValidDeck());
+            var player1 = new MockPlayer(TestDeckService.CreateValidDeck());
 
-            var player2 = new Player(TestDeckService.CreateValidDeck());
+            var player2 = new MockPlayer(TestDeckService.CreateValidDeck());
 
             var gameCore = new GameCore(player1, player2);
 
@@ -41,9 +41,9 @@ namespace BuildDivide.Test
         public void StandPhaseTest()
         {
             //arrange
-            var player1 = new Player(TestDeckService.CreateValidDeck());
+            var player1 = new MockPlayer(TestDeckService.CreateValidDeck());
 
-            var player2 = new Player(TestDeckService.CreateValidDeck());
+            var player2 = new MockPlayer(TestDeckService.CreateValidDeck());
 
             var gameCore = new GameCore(player1, player2);
 
