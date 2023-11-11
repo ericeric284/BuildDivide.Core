@@ -13,8 +13,8 @@ namespace BuildDivide.Core.Games
 		public List<Card> YellowZone { get; set; }
 		public List<Card> RedZone { get; set; }
 		public List<Card> EnergyZone { get; set; }
-
 		public List<Card> Field { get; set; }
+		public List<Card> GraveYard { get; set; }
 
         public Player(Deck deck)
         {
@@ -24,6 +24,7 @@ namespace BuildDivide.Core.Games
 			this.RedZone = new List<Card>();
 			this.EnergyZone = new List<Card>();
             this.Field = new List<Card>();
+			this.GraveYard = new List<Card>();
 			this.Territory = deck.Territory;
         }
 
@@ -93,8 +94,20 @@ namespace BuildDivide.Core.Games
 
 			return card;
 		}
+        public Card TransferCard(Stack<Card> source, List<Card> target)
+        {
+            if (!source.Any())
+            {
+                throw new Exception("No cards are avalible");
+            }
 
-		public List<Card> TransferCards(List<Card> source, List<Card> target, int transferCount)
+            Card card = source.Pop();
+            target.Add(card);
+
+            return card;
+        }
+
+        public List<Card> TransferCards(List<Card> source, List<Card> target, int transferCount)
 		{
 			var cardList = new List<Card>();
 
@@ -106,7 +119,7 @@ namespace BuildDivide.Core.Games
 			return cardList;
 		}
 
-		public void StandAll()
+        public void StandAll()
 		{
             foreach (var energy in EnergyZone)
             {
@@ -120,6 +133,50 @@ namespace BuildDivide.Core.Games
 
 			Territory.IsSatnding = true;
         }
+
+		public void Trigger(DamagePacket damagePacket)
+		{
+			Card triggeredCard;
+
+            //1003-2
+            while (!damagePacket.IsDmageFinished)
+            {
+                if (YellowZone.Count > 0)
+                {
+                    triggeredCard = YellowZone.Last();
+					YellowZone.Remove(triggeredCard);
+                }
+                else if (RedZone.Count > 0)
+                {
+                    triggeredCard = RedZone.Last();
+                    RedZone.Remove(triggeredCard);
+                }
+                else
+                {
+                    //1003-2a Player lost TODO
+                    throw new NotImplementedException();
+                }
+
+				damagePacket.HitDealed++;
+
+                if (triggeredCard.Trigger == Cards.Trigger.BusterCard)
+                {
+					//1003-2c
+					damagePacket.Hit++;
+                }
+                else if (triggeredCard.Trigger == Cards.Trigger.ShotCard)
+                {
+					//1003-2d
+                    //TODO: handle shot card cost if avalible (511-2)
+					//TODO: handle effect of card
+                    //TODO: 1003.2.d-i
+                }
+
+                //1003-2b & 1003-2c & 1003-2d
+                GraveYard.Add(triggeredCard);
+            }
+		}
+
 		public virtual Task HandleEvent(GameEvent ev)
 		{
 			return Task.CompletedTask;
