@@ -123,6 +123,21 @@ _1103_5:
         }
     }
 
+    public class PlayWindowAction
+    {
+        public PlayWindowActionType PlayWindowActionType { get; set; }
+        public Card Card { get; set; }
+
+        public Ability Ability { get; set; }
+
+        public PlayWindowAction(PlayWindowActionType playWindowActionType, Card card, Ability ability)
+        {
+            PlayWindowActionType = playWindowActionType;
+            Card = card;
+            Ability = ability;
+        }
+    }
+
     public enum PlayWindowActionType
     {
         Pass,

@@ -241,37 +241,36 @@ namespace BuildDivide.Core.Games
 
         public void EnterNextPhase()
         {
-            ChangeToNextPhase();
-			CurrentGamePhase.Action(this);
-
-            void ChangeToNextPhase()
+            switch (CurrentGamePhase.Type)
             {
-                switch (CurrentGamePhase.Type)
-                {
-                    case GamePhaseType.Stand:
-						CurrentGamePhase = new StandPhase();
-                        break;
+                case GamePhaseType.Stand:
+                    CurrentGamePhase = new DrawPhase();
+                    break;
 
-                    case GamePhaseType.Draw:
-                        CurrentGamePhase = new DrawPhase();
-                        break;
+                case GamePhaseType.Draw:
+                    CurrentGamePhase = new MainPhase();
+                    break;
 
-                    case GamePhaseType.Main:
-                        CurrentGamePhase = new MainPhase();
-                        break;
+                case GamePhaseType.Main:
+                    CurrentGamePhase = new AttackPhase();
+                    break;
 
-                    case GamePhaseType.Attack:
-                        CurrentGamePhase = new AttackPhase();
-                        break;
+                case GamePhaseType.Attack:
+                    CurrentGamePhase = new EndPhase();
+                    break;
 
-                    case GamePhaseType.End:
-						CurrentGamePhase = new EndPhase();
-                        break;
+                case GamePhaseType.End:
+                    CurrentGamePhase = new DrawPhase();
+                    break;
 
-                    default:
-                        throw new InvalidOperationException("Invalid game phase.");
-                }
+                default:
+                    throw new InvalidOperationException("Invalid game phase.");
             }
+        }
+
+		public void ProcessCurrentPhase()
+		{
+            CurrentGamePhase.Action(this);
         }
 
         public IGamePhase CurrentGamePhase { get; private set; }

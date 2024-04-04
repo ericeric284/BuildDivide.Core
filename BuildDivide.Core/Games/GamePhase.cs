@@ -1,4 +1,6 @@
-﻿namespace BuildDivide.Core.Games
+﻿using BuildDivide.Core.Windows;
+
+namespace BuildDivide.Core.Games
 {
     public enum GamePhaseType
 	{
@@ -26,10 +28,11 @@
 			gameCore.TurnPlayer.StandAll();
 
             //702-2
-            //TODO: handle trigger when turn start
+            //TODO: handle start turn ability tirgger
 
             //702-3
-            //TODO: hanlde 1103 play window
+            var window = new PlayWindow(gameCore);
+
         }
     }
     public class DrawPhase : IGamePhase
@@ -74,7 +77,7 @@
         public void Action(GameCore gameCore)
         {
             //TODO: Attack phase
-            throw new NotImplementedException();
+            
         }
     }
     public class EndPhase : IGamePhase

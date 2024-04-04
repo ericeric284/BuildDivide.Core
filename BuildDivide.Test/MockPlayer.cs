@@ -11,13 +11,32 @@ namespace BuildDivide.Test
 {
     internal class MockPlayer : Player
     {
+        TaskCompletionSource<PlayWindowActionType> PlayWindowTsc { get; set; }
+
         public MockPlayer(Deck deck) : base(deck)
         {
         }
 
         public override Task<PlayWindowActionType> ResolvePlayWindowActionAsync(PlayWindow playWindow)
         {
-            return Task.FromResult(PlayWindowActionType.Pass);   
+            if (PlayWindowTsc != null)
+            {
+                throw new InvalidOperationException("PlayWindow Task already existed");
+            }
+
+            PlayWindowTsc = new TaskCompletionSource<PlayWindowActionType>();
+
+            return PlayWindowTsc.Task;
+        }
+
+        public void Pass()
+        {
+            if (PlayWindowTsc == null)
+            {
+                throw new InvalidOperationException("No playWindow is existed");
+            }
+
+            PlayWindowTsc.SetResult(PlayWindowActionType.Pass);
         }
     }
 }

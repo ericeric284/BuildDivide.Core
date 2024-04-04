@@ -25,9 +25,12 @@ namespace BuildDivide.Test
             var playWindow = new PlayWindow(gameCore);
 
             //Act
-            await playWindow.ResolveAsync();
+            var playWindowResolve = playWindow.ResolveAsync();
+
+            player1.Pass();
 
             //Assert
+            //TODO: validate pass is working
         }
     }
 }
