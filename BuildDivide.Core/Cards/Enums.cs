@@ -1,4 +1,6 @@
-﻿namespace BuildDivide.Core.Cards
+﻿using System;
+
+namespace BuildDivide.Core.Cards
 {
     public enum Attribute { Unit, Ace }
 	public enum Trigger { None, BusterCard, ShotCard }

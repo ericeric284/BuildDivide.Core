@@ -1,4 +1,6 @@
-﻿namespace BuildDivide.Core.Cards
+﻿using System.Collections.Generic;
+
+namespace BuildDivide.Core.Cards
 {
     public class Territory: Card
 	{
