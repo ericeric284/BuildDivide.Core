@@ -11,19 +11,31 @@ namespace BuildDivide.Test
 {
     public class GameCoreTests
     {
+        private static MockPlayer player1;
+        private static MockPlayer player2;
+        private static GameCore gameCore;
+
+        public GameCoreTests()
+        {
+            player1 = new MockPlayer(TestDeckService.CreateValidDeck());
+            player2 = new MockPlayer(TestDeckService.CreateValidDeck());
+            gameCore = new GameCore(player1, player2);
+
+            gameCore.GameEvent.Subscribe(async x =>
+            {
+                //simulate process time
+                await Task.Delay(10);
+                
+            });
+        }
 
         [Fact]
-        public void PreparationTest()
+        public async Task PreparationTest()
         {
             //arrange
-            var player1 = new MockPlayer(TestDeckService.CreateValidDeck());
-
-            var player2 = new MockPlayer(TestDeckService.CreateValidDeck());
-
-            var gameCore = new GameCore(player1, player2);
 
             //action
-            gameCore.Preparation();
+            await gameCore.PreparationAsync();
 
             //assert
             gameCore.Player1.YellowZone.Count.ShouldBe(5);
@@ -38,17 +50,12 @@ namespace BuildDivide.Test
         }
 
         [Fact]
-        public void StandPhaseTest()
+        public async Task StandPhaseTest()
         {
             //arrange
-            var player1 = new MockPlayer(TestDeckService.CreateValidDeck());
-
-            var player2 = new MockPlayer(TestDeckService.CreateValidDeck());
-
-            var gameCore = new GameCore(player1, player2);
 
             //action
-            gameCore.Preparation();
+            await gameCore.PreparationAsync();
 
             gameCore.ProcessCurrentPhase();
 
@@ -63,17 +70,12 @@ namespace BuildDivide.Test
         }
 
         [Fact]
-        public void DrawPhaseTest()
+        public async Task DrawPhaseTest()
         {
             //arrange
-            var player1 = new MockPlayer(TestDeckService.CreateValidDeck());
-
-            var player2 = new MockPlayer(TestDeckService.CreateValidDeck());
-
-            var gameCore = new GameCore(player1, player2);
 
             //action
-            gameCore.Preparation();
+            await gameCore.PreparationAsync();
             gameCore.ProcessCurrentPhase();
 
             gameCore.EnterNextPhase();
@@ -86,17 +88,12 @@ namespace BuildDivide.Test
         }
 
         [Fact]
-        public void MainPhaseTest()
+        public async Task MainPhaseTest()
         {
             //arrange
-            var player1 = new MockPlayer(TestDeckService.CreateValidDeck());
-
-            var player2 = new MockPlayer(TestDeckService.CreateValidDeck());
-
-            var gameCore = new GameCore(player1, player2);
 
             //action
-            gameCore.Preparation();
+            await gameCore.PreparationAsync();
             gameCore.ProcessCurrentPhase();
 
             gameCore.EnterNextPhase();
@@ -112,17 +109,12 @@ namespace BuildDivide.Test
         }
 
         [Fact]
-        public void AttackPhaseTest()
+        public async Task AttackPhaseTest()
         {
             //arrange
-            var player1 = new MockPlayer(TestDeckService.CreateValidDeck());
-
-            var player2 = new MockPlayer(TestDeckService.CreateValidDeck());
-
-            var gameCore = new GameCore(player1, player2);
 
             //action
-            gameCore.Preparation();
+            await gameCore.PreparationAsync();
             gameCore.ProcessCurrentPhase();
 
             gameCore.EnterNextPhase();
@@ -139,17 +131,12 @@ namespace BuildDivide.Test
         }
 
         [Fact]
-        public void EndPhaseTest()
+        public async Task EndPhaseTest()
         {
             //arrange
-            var player1 = new MockPlayer(TestDeckService.CreateValidDeck());
-
-            var player2 = new MockPlayer(TestDeckService.CreateValidDeck());
-
-            var gameCore = new GameCore(player1, player2);
 
             //action
-            gameCore.Preparation();
+            await gameCore.PreparationAsync();
             gameCore.ProcessCurrentPhase();
 
             gameCore.EnterNextPhase();

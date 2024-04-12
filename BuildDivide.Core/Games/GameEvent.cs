@@ -1,17 +1,30 @@
-﻿namespace BuildDivide.Core.Games
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+
+namespace BuildDivide.Core.Games
 {
-    public abstract class GameEvent
-	{
-
-	}
-
-    public class ShuffleEvent : GameEvent
+    public interface IGameEvent
     {
-        public ShuffleEvent(Player player)
-        {
-            Player = player;
-        }
-        public Player Player { get; set; }
+        public GameEventType EventType { get; }
+    }
+
+    public enum GameEventType
+    {
+        Shuffle,
+        Draw,
+        Play,
+        Discard,
+        Energy,
+        Attack,
+        Damage,
+        Heal,
+        EndTurn,
+        EndGame
+    }
+
+    public class ShuffleEvent : IGameEvent
+    {
+        public GameEventType EventType => GameEventType.Shuffle;
     }
 
 }

@@ -20,7 +20,7 @@ namespace BuildDivide.Test
 
             var gameCore = new GameCore(player1, player2);
 
-            gameCore.Preparation();
+            gameCore.PreparationAsync();
 
             var playWindow = new PlayWindow(gameCore);
 

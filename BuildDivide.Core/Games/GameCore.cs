@@ -1,5 +1,6 @@
 ﻿using BuildDivide.Core.Cards;
 using BuildDivide.Core.Decks;
+using BuildDivide.Core.Utilities;
 using BuildDivide.Core.Windows;
 using System;
 using System.Collections.Generic;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace BuildDivide.Core.Games
 {
-	//TODO: make player abstract class
+    //TODO: make player abstract class
     public abstract class Player
 	{
 		public Deck Deck { get; set; }
@@ -181,16 +182,52 @@ namespace BuildDivide.Core.Games
             }
 		}
 
-		public virtual Task HandleEvent(GameEvent ev)
+		public virtual Task HandleEvent(IGameEvent ev)
 		{
 			return Task.CompletedTask;
 		}
+        public virtual Task<T> HandleEvent<T>(IGameEvent ev) where T: new()
+		{
+            return Task.FromResult(new T());
+        }
 
-		public abstract Task<PlayWindowActionType> ResolvePlayWindowActionAsync(PlayWindow playWindow);
+        public abstract Task<PlayWindowActionType> ResolvePlayWindowActionAsync(PlayWindow playWindow);
+
+
+		public void CheckAvalibleOptions()
+		{
+
+		}
 	}
 
-	
-	public interface GameState
+	public interface PlayerAction
+	{
+		bool IsAvailible();
+		Task DoActionAsync();
+	}
+
+    public class PlayCardAction : PlayerAction
+    {
+        public Card Card { get; }
+        public PlayCardAction(Card card)
+        {
+            Card = card;
+        }
+
+        public Task DoActionAsync()
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool IsAvailible()
+        {
+			return true;
+        }
+    }
+
+
+
+    public interface GameState
 	{
 		GamePhaseType Phase { get; set; }
 
@@ -200,6 +237,8 @@ namespace BuildDivide.Core.Games
 
 	public class GameCore
 	{
+        public AsyncEventNotifier<IGameEvent> GameEvent { get; } = new AsyncEventNotifier<IGameEvent>();
+
         public Player Player1 { get; }
         public Player Player2 { get; }
 
@@ -216,14 +255,17 @@ namespace BuildDivide.Core.Games
 
 		public int Turn { get; private set; }
 
-        public void Preparation()
+        public async Task PreparationAsync()
         {
             Turn = 1;
 
 			DecideFirstPlayer();
 
             Player1.Deck.Shuffle();
+			await GameEvent.RaiseEventAsync(new ShuffleEvent());
+
             Player2.Deck.Shuffle();
+            await GameEvent.RaiseEventAsync(new ShuffleEvent());
 
             PlaceTerritoryCard(Player1);
             PlaceTerritoryCard(Player2);
