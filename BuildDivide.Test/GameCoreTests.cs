@@ -19,14 +19,7 @@ namespace BuildDivide.Test
         {
             player1 = new MockPlayer(TestDeckService.CreateValidDeck());
             player2 = new MockPlayer(TestDeckService.CreateValidDeck());
-            gameCore = new GameCore(player1, player2);
-
-            gameCore.GameEvent.Subscribe(async x =>
-            {
-                //simulate process time
-                await Task.Delay(10);
-                
-            });
+            gameCore = new GameCore(player1, player2, new CoinFlipPlayerDecider());
         }
 
         [Fact]

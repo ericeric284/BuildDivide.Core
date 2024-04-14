@@ -18,7 +18,7 @@ namespace BuildDivide.Test
 
             var player2 = new MockPlayer(TestDeckService.CreateValidDeck());
 
-            var gameCore = new GameCore(player1, player2);
+            var gameCore = new GameCore(player1, player2,new MockDecider());
 
             gameCore.PreparationAsync();
 
@@ -31,6 +31,16 @@ namespace BuildDivide.Test
 
             //Assert
             //TODO: validate pass is working
+        }
+    }
+
+    public class MockDecider : InitialPlayerDecider
+    {
+        public MockDecider() { }
+
+        public Player DecideFirstPlayer(Player player1, Player player2)
+        {
+            return player1;
         }
     }
 }

@@ -1,243 +1,16 @@
-﻿using BuildDivide.Core.Cards;
-using BuildDivide.Core.Decks;
-using BuildDivide.Core.Utilities;
-using BuildDivide.Core.Windows;
+﻿using BuildDivide.Core.Events;
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Numerics;
 using System.Threading.Tasks;
 
 namespace BuildDivide.Core.Games
 {
-    //TODO: make player abstract class
-    public abstract class Player
+
+
+    public class GameCore
 	{
-		public Deck Deck { get; set; }
-		public Card Territory { get; set; }
-		public List<Card> Hand { get; set; }
-		public List<Card> YellowZone { get; set; }
-		public List<Card> RedZone { get; set; }
-		public List<Card> EnergyZone { get; set; }
-		public List<Card> Field { get; set; }
-		public List<Card> GraveYard { get; set; }
-
-        public Player(Deck deck)
-        {
-            this.Deck = deck;
-            this.Hand = new List<Card>();
-			this.YellowZone = new List<Card>();
-			this.RedZone = new List<Card>();
-			this.EnergyZone = new List<Card>();
-            this.Field = new List<Card>();
-			this.GraveYard = new List<Card>();
-			this.Territory = deck.Territory;
-        }
-
-        public void RedrawCard()
-		{
-			var tempZone = Hand.ToList();
-
-			Hand.Clear();
-			DrawCards(5);
-			Deck.AddCards(tempZone);
-
-            Deck.Shuffle();
-        }
-
-		public Card DrawCard()
-		{
-			Card card;
-
-			if (Deck.Cards.Any())
-			{
-				//Draw from deck
-				card = TransferCard(Deck.Cards, Hand);
-			}
-			else
-			{
-				//Draw from life
-				if (YellowZone.Any())
-				{
-					card = TransferCard(YellowZone, Hand);
-				}
-				else if (RedZone.Any())
-				{
-					card = TransferCard(RedZone, Hand);
-				}
-				else
-				{
-					//TODO:handle player lose, throw custom exception indicate player lose?
-					throw new Exception("No cards are avalible");
-				}
-			}
-
-			return card;
-		}
-
-		public List<Card> DrawCards(int count)
-		{
-			var cardList = new List<Card>();
-
-			for (int i = 0; i < count; i++)
-			{
-				cardList.Add(DrawCard());
-			}
-
-			return cardList;
-		}
-
-		public Card TransferCard(List<Card> source, List<Card> target)
-		{
-			if (!source.Any())
-			{
-				throw new Exception("No cards are avalible");
-			}
-
-			Card card = source[0];
-			target.Add(card);
-			source.RemoveAt(0);
-
-			return card;
-		}
-        public Card TransferCard(Stack<Card> source, List<Card> target)
-        {
-            if (!source.Any())
-            {
-                throw new Exception("No cards are avalible");
-            }
-
-            Card card = source.Pop();
-            target.Add(card);
-
-            return card;
-        }
-
-        public List<Card> TransferCards(List<Card> source, List<Card> target, int transferCount)
-		{
-			var cardList = new List<Card>();
-
-			for (var i = 0; i < transferCount; i++)
-			{
-				cardList.Add(TransferCard(source, target));
-			}
-
-			return cardList;
-		}
-
-        public void StandAll()
-		{
-            foreach (var energy in EnergyZone)
-            {
-				energy.IsSatnding = true;
-            }
-
-			foreach(var unit in Field)
-			{
-				unit.IsSatnding = true;
-            }
-
-			Territory.IsSatnding = true;
-        }
-
-		public void Trigger(DamagePacket damagePacket)
-		{
-			Card triggeredCard;
-
-            //1003-2
-            while (!damagePacket.IsDmageFinished)
-            {
-                if (YellowZone.Count > 0)
-                {
-                    triggeredCard = YellowZone.Last();
-					YellowZone.Remove(triggeredCard);
-                }
-                else if (RedZone.Count > 0)
-                {
-                    triggeredCard = RedZone.Last();
-                    RedZone.Remove(triggeredCard);
-                }
-                else
-                {
-                    //1003-2a Player lost TODO
-                    throw new NotImplementedException();
-                }
-
-				damagePacket.HitDealed++;
-
-                if (triggeredCard.Trigger == Cards.Trigger.BusterCard)
-                {
-					//1003-2c
-					damagePacket.Hit++;
-                }
-                else if (triggeredCard.Trigger == Cards.Trigger.ShotCard)
-                {
-					//1003-2d
-                    //TODO: handle shot card cost if avalible (511-2)
-					//TODO: handle effect of card
-                    //TODO: 1003.2.d-i
-                }
-
-                //1003-2b & 1003-2c & 1003-2d
-                GraveYard.Add(triggeredCard);
-            }
-		}
-
-		public virtual Task HandleEvent(IGameEvent ev)
-		{
-			return Task.CompletedTask;
-		}
-        public virtual Task<T> HandleEvent<T>(IGameEvent ev) where T: new()
-		{
-            return Task.FromResult(new T());
-        }
-
-        public abstract Task<PlayWindowActionType> ResolvePlayWindowActionAsync(PlayWindow playWindow);
-
-
-		public void CheckAvalibleOptions()
-		{
-
-		}
-	}
-
-	public interface PlayerAction
-	{
-		bool IsAvailible();
-		Task DoActionAsync();
-	}
-
-    public class PlayCardAction : PlayerAction
-    {
-        public Card Card { get; }
-        public PlayCardAction(Card card)
-        {
-            Card = card;
-        }
-
-        public Task DoActionAsync()
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool IsAvailible()
-        {
-			return true;
-        }
-    }
-
-
-
-    public interface GameState
-	{
-		GamePhaseType Phase { get; set; }
-
-		Task DoActionAsync();
-	}
-
-
-	public class GameCore
-	{
-        public AsyncEventNotifier<IGameEvent> GameEvent { get; } = new AsyncEventNotifier<IGameEvent>();
+        private readonly InitialPlayerDecider initialPlayerDecider;
 
         public Player Player1 { get; }
         public Player Player2 { get; }
@@ -246,10 +19,11 @@ namespace BuildDivide.Core.Games
 
         public Player NonTurnPlayer => TurnPlayer == Player1 ? Player2 : Player1;
 
-        public GameCore(Player player1, Player player2)
+        public GameCore(Player player1, Player player2, InitialPlayerDecider initialPlayerDecider)
         {
             Player1 = player1;
             Player2 = player2;
+            this.initialPlayerDecider = initialPlayerDecider;
         }
         
 
@@ -259,30 +33,86 @@ namespace BuildDivide.Core.Games
         {
             Turn = 1;
 
-			DecideFirstPlayer();
+            await DecideFirstPlayerAsync();
 
-            Player1.Deck.Shuffle();
-			await GameEvent.RaiseEventAsync(new ShuffleEvent());
+            await ShuffleDeck();
+            
+            await DrawInitialHandAsync();
 
-            Player2.Deck.Shuffle();
-            await GameEvent.RaiseEventAsync(new ShuffleEvent());
+            await PlaceLifeAsync();
 
-            PlaceTerritoryCard(Player1);
-            PlaceTerritoryCard(Player2);
+            await PlaceEnergyAsync(Player1);
+            await PlaceEnergyAsync(Player2);
+
+            this.CurrentGamePhase = new StandPhase();
+            await CurrentGamePhase.ActionAsync(this);
 
 
-            //TODO: handle redraw decision somehow
-            DrawInitialHand(Player1, () => false);
-            DrawInitialHand(Player2, () => false);
+            async Task DecideFirstPlayerAsync()
+            {
+                TurnPlayer = initialPlayerDecider.DecideFirstPlayer(Player1, Player2);
 
-            PlaceLife(Player1);
-            PlaceLife(Player2);
+                var t1 = Player1.NotifyFirstPlayerDecidedAsync(new FirstPlayerDecidedEvent()
+                {
+                    IsNotifedPlayerFirst = TurnPlayer == Player1
+                });
 
-            PlaceEnergy(Player1);
-            PlaceEnergy(Player2);
+                var t2 = Player2.NotifyFirstPlayerDecidedAsync(new FirstPlayerDecidedEvent()
+                {
+                    IsNotifedPlayerFirst = TurnPlayer == Player2
+                });
 
-			this.CurrentGamePhase = new StandPhase();
-            CurrentGamePhase.Action(this);
+                await Task.WhenAll(t1, t2);
+            }
+
+            async Task ShuffleDeck()
+            {
+                Player1.Deck.Shuffle();
+                Player2.Deck.Shuffle();
+
+                //Notify shuffle event
+                {
+                    var t1 = Player1.NotifyShuffleEventAsync(new ShuffleEvent());
+                    var t2 = Player2.NotifyShuffleEventAsync(new ShuffleEvent());
+                    await Task.WhenAll(t1, t2);
+                }
+            }
+
+            async Task DrawInitialHandAsync()
+            {
+                {
+                    var p1DrawCards = Player1.DrawCards(5);
+                    var p2DrawCards = Player2.DrawCards(5);
+
+                    //Notify draw event
+                    var t1 = Player1.NotifyInitialDrawAsync(new InitialDrawEvent(p1DrawCards));
+                    var t2 = Player2.NotifyInitialDrawAsync(new InitialDrawEvent(p2DrawCards));
+                    await Task.WhenAll(t1, t2);
+
+                    bool p1RequestRedraw = t1.Result;
+                    bool p2RequestRedraw = t2.Result;
+
+                    await HandleRedraw(p1RequestRedraw, p2RequestRedraw);
+                }
+
+                async Task HandleRedraw(bool p1RequestRedraw, bool p2RequestRedraw)
+                {
+                    var list = new List<Task>();
+                    if (p1RequestRedraw)
+                    {
+                        var redrawnCards = Player1.RedrawCard();
+                        list.Add(Player1.NotifyRedrawResult(new InitialRedrawResultEvent(redrawnCards)));
+                    }
+
+                    if (p2RequestRedraw)
+                    {
+                        var redrawnCards = Player1.RedrawCard();
+                        list.Add(Player2.NotifyRedrawResult(new InitialRedrawResultEvent(redrawnCards)));
+                    }
+
+                    await Task.WhenAll(list);
+                }
+            }
         }
 
         public void EnterNextPhase()
@@ -316,53 +146,52 @@ namespace BuildDivide.Core.Games
 
 		public void ProcessCurrentPhase()
 		{
-            CurrentGamePhase.Action(this);
+            CurrentGamePhase.ActionAsync(this);
         }
 
         public IGamePhase CurrentGamePhase { get; private set; }
 
         #region prepartion
 
-
-
-        private void PlaceTerritoryCard(Player Board)
+		private async Task PlaceLifeAsync()
 		{
-			// Place the territory card on the back side (character side) in the "territory" position
-		}
+            // From the top of the deck, place 5 cards in the yellow zone
+            // and 5 cards in the red zone, for a total of 10 cards face down in the life zone.
 
-		private void DecideFirstPlayer()
-		{
-			//TODO: decide first player, using provider from outside
-            TurnPlayer = Player1;
+            Player1.TransferCards(Player1.Deck.Cards, Player1.YellowZone, 5);
+            Player1.TransferCards(Player1.Deck.Cards, Player1.RedZone, 5);
+
+            Player2.TransferCards(Player2.Deck.Cards, Player2.YellowZone, 5);
+            Player2.TransferCards(Player2.Deck.Cards, Player2.RedZone, 5);
+
+            var t1 = Player1.NotifyLifePlaced(new InitialPlaceLifeEvent());
+            var t2 = Player2.NotifyLifePlaced(new InitialPlaceLifeEvent());
+            await Task.WhenAll(t1, t2);
         }
 
-		private void DrawInitialHand(Player player, Func<bool> shouldRedraw)
+		private async Task PlaceEnergyAsync(Player player)
 		{
-			// If you don't like the card you drew, you can "redraw your hand" only once.
-			player.DrawCards(5);
+            // From the top of the deck, place two cards face up in the energy zone.
+            var cards = player.TransferCards(player.Deck.Cards, player.EnergyZone, 2);
 
-			// Check if player wants to redraw hand
-			if (shouldRedraw())
-			{
-				player.RedrawCard();
-			}
-		}
-
-		private void PlaceLife(Player player)
-		{
-			// From the top of the deck, place 5 cards in the yellow zone
-			// and 5 cards in the red zone, for a total of 10 cards face down in the life zone.
-
-			player.TransferCards(player.Deck.Cards, player.YellowZone, 5);
-			player.TransferCards(player.Deck.Cards, player.RedZone, 5);
-		}
-
-		private void PlaceEnergy(Player player)
-		{
-			// From the top of the deck, place two cards face up in the energy zone.
-			player.TransferCards(player.Deck.Cards, player.EnergyZone, 2);
-		}
+            var t1 = Player1.NotifyTransferCardsAsync(new TransferCardsEvent(cards, Cards.CardPosition.Deck, Cards.CardPosition.EnergyZone));
+            var t2 = Player2.NotifyTransferCardsAsync(new TransferCardsEvent(cards, Cards.CardPosition.Deck, Cards.CardPosition.EnergyZone));
+            await Task.WhenAll(t1, t2);
+        }
 
 		#endregion prepartion
+    }
+
+    public interface InitialPlayerDecider
+    {
+        Player DecideFirstPlayer(Player player1, Player player2);
+    }
+
+    public class CoinFlipPlayerDecider : InitialPlayerDecider
+    {
+        public Player DecideFirstPlayer(Player player1, Player player2)
+        {
+            return new Random().Next(2) == 0 ? player1 : player2;
+        }
     }
 }

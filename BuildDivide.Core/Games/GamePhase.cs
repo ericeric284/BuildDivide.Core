@@ -1,4 +1,5 @@
 ﻿using BuildDivide.Core.Windows;
+using System.Threading.Tasks;
 
 namespace BuildDivide.Core.Games
 {
@@ -15,14 +16,14 @@ namespace BuildDivide.Core.Games
 	{
 		public GamePhaseType Type { get; }
 
-		public void Action(GameCore gameCore);
+		public Task ActionAsync(GameCore gameCore);
 	}
 
     public class StandPhase : IGamePhase
     {
 		public GamePhaseType Type => GamePhaseType.Stand;
 
-        public void Action(GameCore gameCore)
+        public Task ActionAsync(GameCore gameCore)
         {
             //702-1
 			gameCore.TurnPlayer.StandAll();
@@ -33,13 +34,14 @@ namespace BuildDivide.Core.Games
             //702-3
             var window = new PlayWindow(gameCore);
 
+            return Task.CompletedTask;
         }
     }
     public class DrawPhase : IGamePhase
     {
         public GamePhaseType Type => GamePhaseType.Draw;
 
-        public void Action(GameCore gameCore)
+        public Task ActionAsync(GameCore gameCore)
         {
             //703-1
             //TODO: draw phase start trigger
@@ -55,36 +57,41 @@ namespace BuildDivide.Core.Games
 
             //703-4
             //TODO: handle 1103 play window
+
+            return Task.CompletedTask;
         }
     }
     public class MainPhase : IGamePhase
     {
         public GamePhaseType Type => GamePhaseType.Main;
 
-        public void Action(GameCore gameCore)
+        public Task ActionAsync(GameCore gameCore)
         {
             //704-1
             //TODO: start phase trigger
 
             //704-2
             //TODO: handle 1103 play window
+
+            return Task.CompletedTask;
         }
     }
     public class AttackPhase : IGamePhase
     {
         public GamePhaseType Type => GamePhaseType.Attack;
 
-        public void Action(GameCore gameCore)
+        public Task ActionAsync(GameCore gameCore)
         {
             //TODO: Attack phase
-            
+
+            return Task.CompletedTask;
         }
     }
     public class EndPhase : IGamePhase
     {
         public GamePhaseType Type => GamePhaseType.End;
 
-        public void Action(GameCore gameCore)
+        public Task ActionAsync(GameCore gameCore)
         {
             //706-1
             //TODO: turn end trigger & end phase start trigger
@@ -106,6 +113,8 @@ namespace BuildDivide.Core.Games
 
             //706-7
             //TODO: if there's 1303 or 1205-2,return to 706-2,otherwise end turn and start next turn
+
+            return Task.CompletedTask;
         }
     }
 }

@@ -1,6 +1,8 @@
 ﻿using BuildDivide.Core.Decks;
+using BuildDivide.Core.Events;
 using BuildDivide.Core.Games;
 using BuildDivide.Core.Windows;
+using Shouldly;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -37,6 +39,37 @@ namespace BuildDivide.Test
             }
 
             PlayWindowTsc.SetResult(PlayWindowActionType.Pass);
+        }
+
+        public override Task NotifyFirstPlayerDecidedAsync(FirstPlayerDecidedEvent ev)
+        {
+            return Task.CompletedTask;
+        }
+
+        public override Task<bool> NotifyInitialDrawAsync(InitialDrawEvent ev)
+        {
+            return Task.FromResult(true);
+        }
+
+        public override Task NotifyRedrawResult(InitialRedrawResultEvent ev)
+        {
+            ev.RedrawCards.Count.ShouldBe(5);
+            return Task.CompletedTask;
+        }
+
+        public override Task NotifyShuffleEventAsync(ShuffleEvent ev)
+        {
+            return Task.CompletedTask;
+        }
+
+        public override Task NotifyLifePlaced(InitialPlaceLifeEvent ev)
+        {
+            return Task.CompletedTask;
+        }
+
+        public override Task NotifyTransferCardsAsync(TransferCardsEvent ev)
+        {
+            return Task.CompletedTask;
         }
     }
 }
