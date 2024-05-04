@@ -5,7 +5,7 @@ namespace BuildDivide.Core.Cards
     public enum Attribute { Unit, Ace }
 	public enum Trigger { None, BusterCard, ShotCard }
 	public enum PlayingTiming { Normal, Quick }
-	public enum CardType { Unit, Command ,Terrirtory}
+	public enum CardType { Unknown, Unit, Command ,Terrirtory}
 
 	[Flags]
 	public enum Color
