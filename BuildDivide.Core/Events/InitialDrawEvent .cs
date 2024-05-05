@@ -7,11 +7,11 @@ namespace BuildDivide.Core.Events
     {
         public GameEventType EventType => GameEventType.InitialDraw;
 
-        public InitialDrawEvent(List<Card> redrawCards)
+        public InitialDrawEvent(List<Card> initialDrawCards)
         {
-            RedrawCards = redrawCards;
+            InitialDrawCards = initialDrawCards;
         }
 
-        public List<Card> RedrawCards { get; set; }
+        public List<Card> InitialDrawCards { get; set; }
     }
 }
